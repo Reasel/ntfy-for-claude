@@ -66,20 +66,35 @@ For a private self-hosted ntfy server with access control:
 - You want to **report progress** and optionally get feedback
 - The user is likely **away from the terminal** (long-running task, background session)
 
+## CRITICAL: Maximum 3 Options
+
+**ntfy supports a maximum of 3 action buttons. You MUST NOT pass more than 3 options.**
+
+This is a hard limitation of the ntfy platform. If you have more than 3 choices, you MUST consolidate them down to 3 or fewer. Strategies:
+- **Group related options** into a single choice (e.g., "Fix all" instead of listing each fix separately)
+- **Use a two-step approach**: first ask a broad category question (3 options), then follow up with a narrower question
+- **Eliminate low-value options**: pick the 2-3 most likely choices the user would want
+
+**NEVER pass 4+ options to `--options`.** The notification will break and the user won't be able to respond properly.
+
 ## How to Use
 
-### Step 1: Decide your question and options
+### Step 1: Decide your question and options (max 3)
 
-Keep the message short — the user reads it on a phone. The `--options` flag handles numbering and button creation for you, so just provide a clear question and short option labels.
+Keep the message short — the user reads it on a phone. The `--options` flag handles numbering and button creation for you, so just provide a clear question and short option labels. **Always 3 or fewer options.**
 
 Good examples:
 - `"🤖 Found 3 failing tests after refactor."` with `--options "Fix tests" "Revert" "Skip"`
 - `"⚠️ Delete the staging database?"` with `--options "Yes, delete" "No, abort"`
 - `"🤖 Which auth library?"` with `--options "Passport.js" "Auth0 SDK" "Roll our own"`
 
-### Step 2: Run the script with options
+Bad examples (TOO MANY OPTIONS — DO NOT DO THIS):
+- `--options "Fix" "Revert" "Skip" "Ask later"` — 4 options, will break
+- `--options "React" "Vue" "Svelte" "Angular" "Solid"` — 5 options, will break
 
-Pass `--options` followed by the label for each choice. These become **tappable buttons** on the notification — the user just taps instead of typing.
+### Step 2: Run the script with options (max 3)
+
+Pass `--options` followed by the label for each choice (up to 3). These become **tappable buttons** on the notification — the user just taps instead of typing.
 
 ```bash
 bash /path/to/ntfy-notify/scripts/ntfy_ask.sh \
@@ -100,8 +115,6 @@ Tap a button or reply with a number (1-3):
 ```
 
 ...with three tappable buttons at the bottom: `1) Fix tests`, `2) Revert`, `3) Skip`.
-
-**ntfy supports up to 3 action buttons.** If you pass more than 3 options, the first 3 get buttons and the rest appear in the message text only (the user types the number for those).
 
 You can also call it **without `--options`** for free-text input:
 
@@ -150,6 +163,7 @@ If the user doesn't reply within the timeout (default 5 minutes), the script pri
 
 ## Tips
 
+- **MAXIMUM 3 OPTIONS. This is non-negotiable.** Consolidate, split into multiple questions, or eliminate choices to stay at 3 or fewer.
 - **Keep messages short**: Phone screens are small. Lead with the key question.
 - **Use emoji**: They help scanability on notifications. 🤖 for Claude, ⚠️ for warnings, ✅ for success, ❌ for errors.
 - **Number every option**: Even yes/no should be `1) Yes  2) No` — it's faster to type a digit.

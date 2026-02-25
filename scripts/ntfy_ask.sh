@@ -111,7 +111,13 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ -z "$MESSAGE" ]]; then
-    echo "Usage: ntfy_ask.sh [--notify] \"message\" [--options \"opt1\" \"opt2\" ...]" >&2
+    echo "Usage: ntfy_ask.sh [--notify] \"message\" [--options \"opt1\" \"opt2\" \"opt3\"]" >&2
+    exit 1
+fi
+
+MAX_OPTIONS=3
+if [[ ${#OPTIONS[@]} -gt $MAX_OPTIONS ]]; then
+    echo "ERROR: Maximum $MAX_OPTIONS options allowed (got ${#OPTIONS[@]}). ntfy only supports up to $MAX_OPTIONS action buttons." >&2
     exit 1
 fi
 
@@ -147,17 +153,11 @@ if [[ ${#OPTIONS[@]} -gt 0 ]]; then
     MESSAGE="${MESSAGE}"$'\n'""$'\n'"Tap a button or reply with a number (1-${#OPTIONS[@]}):"
 fi
 
-# Build Actions header — up to 3 tappable buttons, each POSTs its number back
+# Build Actions header — tappable buttons (max 3, enforced above)
 ACTIONS_HEADER=""
-MAX_BUTTONS=3
 if [[ ${#OPTIONS[@]} -gt 0 ]]; then
-    BUTTON_COUNT=${#OPTIONS[@]}
-    if (( BUTTON_COUNT > MAX_BUTTONS )); then
-        BUTTON_COUNT=$MAX_BUTTONS
-    fi
-
     ACTION_PARTS=()
-    for i in $(seq 0 $((BUTTON_COUNT - 1))); do
+    for i in $(seq 0 $((${#OPTIONS[@]} - 1))); do
         NUM=$((i + 1))
         LABEL="${NUM}) ${OPTIONS[$i]}"
         # ntfy http action format: http, <label>, <url>, method=POST, body=<reply>[, auth]

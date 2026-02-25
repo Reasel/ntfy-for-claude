@@ -119,7 +119,7 @@ If everything is configured correctly, you'll get a push notification on your ph
 
 ## Usage
 
-### Ask with tappable buttons (up to 3)
+### Ask with tappable buttons (max 3)
 
 ```bash
 ntfy_ask.sh "🤖 Which database?" --options "PostgreSQL" "SQLite" "MongoDB"
@@ -127,13 +127,7 @@ ntfy_ask.sh "🤖 Which database?" --options "PostgreSQL" "SQLite" "MongoDB"
 
 The user sees buttons they can tap — the response is just the number (`1`, `2`, or `3`).
 
-### Ask with more than 3 options
-
-```bash
-ntfy_ask.sh "🤖 Pick a framework:" --options "React" "Vue" "Svelte" "Angular"
-```
-
-The first 3 options get tappable buttons. The 4th appears in the message text and the user types `4`.
+> **Maximum 3 options.** ntfy supports at most 3 action buttons. The script will error if you pass more than 3. If you have more choices, consolidate them or use a two-step question.
 
 ### Free-text question (no buttons)
 
