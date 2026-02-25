@@ -1,11 +1,30 @@
 ---
 name: ntfy-notify
-description: Send numbered-choice notifications to the user's phone via ntfy and wait for their response. Use this skill whenever Claude Code needs user input, confirmation, a decision between options, or approval during an autonomous/background session — especially when the user may be away from their terminal. Trigger this for any "ask the user" moment, permission checks, ambiguous decisions, error recovery choices, or when you want to keep the user in the loop on progress. Also use when the user explicitly mentions ntfy, phone notifications, or remote responses.
+description: Use ONLY when the user explicitly asks to enable ntfy mode, phone notification mode, or remote response mode. Trigger phrases include "enable ntfy", "switch to ntfy", "use phone notifications", "ntfy mode on", "notify me on my phone", or similar. Also use when the user asks to disable/turn off ntfy mode. Do NOT use this skill automatically — it must be explicitly requested by the user.
 ---
 
 # ntfy Notify — Phone-Based Input for Claude Code
 
 Send questions with numbered options to the user's phone via [ntfy](https://ntfy.sh) and wait for their reply. This lets you keep working autonomously while the user responds from anywhere.
+
+## Mode Toggle
+
+This skill operates as a **toggle mode**. It is OFF by default.
+
+### Enabling ntfy mode
+
+When the user says something like "enable ntfy", "switch to ntfy mode", "use phone notifications", or "I'm stepping away, notify me":
+
+1. Confirm to the user: "ntfy mode enabled — I'll send questions to your phone."
+2. For the rest of the session, use the ntfy script instead of `AskUserQuestion` whenever you need user input.
+3. Continue using ntfy for all questions until the user turns it off.
+
+### Disabling ntfy mode
+
+When the user says something like "disable ntfy", "turn off ntfy", "stop phone notifications", "I'm back", or "ntfy mode off":
+
+1. Confirm to the user: "ntfy mode disabled — back to terminal input."
+2. Stop using the ntfy script and return to normal `AskUserQuestion` behavior.
 
 ## Prerequisites
 
@@ -58,13 +77,16 @@ For a private self-hosted ntfy server with access control:
 
 5. **In the phone app**, add the subscription using the same server URL and topic, logging in with the user credentials or a separate read-access token.
 
-## When to Use
+## When to Use (only while ntfy mode is ON)
+
+Once the user has enabled ntfy mode, use it whenever you would normally ask the user a question:
 
 - You need the user to **choose between options** (e.g., which approach to take, which file to modify)
 - You need **confirmation or approval** before a destructive/irreversible action
 - You hit an **ambiguous situation** and want guidance
 - You want to **report progress** and optionally get feedback
-- The user is likely **away from the terminal** (long-running task, background session)
+
+**Do NOT use this skill if ntfy mode has not been enabled by the user.**
 
 ## CRITICAL: Maximum 3 Options
 
