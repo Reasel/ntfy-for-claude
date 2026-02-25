@@ -46,14 +46,19 @@ cp -r ntfy-notify ~/.claude/skills/ntfy-notify
 <details>
 <summary><strong>Option A: Public ntfy.sh (quick & easy)</strong></summary>
 
-No server setup needed. Just pick a unique topic name (it acts as a shared secret):
+No server setup needed. A unique topic is auto-generated from your hostname and username, so you can use it right away:
+
+```bash
+# See your auto-generated topic name
+bash ~/.claude/skills/ntfy-notify/scripts/ntfy_ask.sh --notify "test"
+# → NOTE: CLAUDE_NTFY_TOPIC not set. Using auto-generated topic: claude-a1b2c3d4e5f6
+```
+
+Subscribe to that topic in the ntfy phone app. To set a custom topic instead:
 
 ```bash
 # Add to your shell profile (~/.bashrc, ~/.zshrc, etc.)
-export NTFY_TOPIC="claude-code-$(openssl rand -hex 6)"
-
-# Print it so you can subscribe in the phone app
-echo "Subscribe to this topic in ntfy app: $NTFY_TOPIC"
+export CLAUDE_NTFY_TOPIC="my-custom-topic-name"
 ```
 
 In the ntfy phone app, tap **+** and subscribe to that exact topic name.
@@ -86,9 +91,9 @@ ntfy token add claude-bot
 
 ```bash
 # Add to your shell profile (~/.bashrc, ~/.zshrc, etc.)
-export NTFY_SERVER="https://ntfy.yourdomain.com"
-export NTFY_TOPIC="claude-code"
-export NTFY_TOKEN="tk_your_token_here"
+export CLAUDE_NTFY_SERVER="https://ntfy.yourdomain.com"
+export CLAUDE_NTFY_TOPIC="claude-code"
+export CLAUDE_NTFY_TOKEN="tk_your_token_here"
 ```
 
 **In the phone app**, add a subscription:
@@ -166,7 +171,7 @@ esac
 | Code | Meaning |
 |------|---------|
 | `0`  | Reply received (printed to stdout) |
-| `1`  | Timeout — no reply within `NTFY_TIMEOUT` seconds (prints `TIMEOUT` to stdout) |
+| `1`  | Timeout — no reply within `CLAUDE_NTFY_TIMEOUT` seconds (prints `TIMEOUT` to stdout) |
 | `2`  | Missing dependency (`curl`, `jq`, or `base64`) |
 | `3`  | Failed to send notification (network error or auth failure) |
 
@@ -174,14 +179,14 @@ esac
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
-| `NTFY_TOPIC` | ✅ | — | Topic name to publish/subscribe to |
-| `NTFY_SERVER` | | `https://ntfy.sh` | Server URL (set for self-hosted) |
-| `NTFY_TOKEN` | | — | Access token auth (preferred) |
-| `NTFY_USER` | | — | Username for basic auth |
-| `NTFY_PASSWORD` | | — | Password for basic auth (requires `NTFY_USER`) |
-| `NTFY_TIMEOUT` | | `300` | Seconds to wait for a reply |
+| `CLAUDE_NTFY_TOPIC` | | `claude-<hash>` | Topic name. Auto-generated from hostname + username if not set |
+| `CLAUDE_NTFY_SERVER` | | `https://ntfy.sh` | Server URL (set for self-hosted) |
+| `CLAUDE_NTFY_TOKEN` | | — | Access token auth (preferred) |
+| `CLAUDE_NTFY_USER` | | — | Username for basic auth |
+| `CLAUDE_NTFY_PASSWORD` | | — | Password for basic auth (requires `CLAUDE_NTFY_USER`) |
+| `CLAUDE_NTFY_TIMEOUT` | | `300` | Seconds to wait for a reply |
 
-If both `NTFY_TOKEN` and `NTFY_USER`/`NTFY_PASSWORD` are set, token auth takes priority.
+If both `CLAUDE_NTFY_TOKEN` and `CLAUDE_NTFY_USER`/`CLAUDE_NTFY_PASSWORD` are set, token auth takes priority.
 
 ## How Claude Code Uses This
 
@@ -241,20 +246,20 @@ All of these are pre-installed on macOS and most Linux distributions.
 
 ## Troubleshooting
 
-**"ERROR: Set NTFY_TOPIC environment variable"**
-→ Export `NTFY_TOPIC` in your shell profile and restart your terminal.
+**"NOTE: CLAUDE_NTFY_TOPIC not set. Using auto-generated topic: ..."**
+→ This is normal — the script auto-generates a topic from your hostname and username. Subscribe to the shown topic in the ntfy app, or set `CLAUDE_NTFY_TOPIC` explicitly.
 
 **Notification sent but no buttons appear**
 → Make sure you're using the ntfy app (not just browser notifications). Action buttons require the native app.
 
 **Button taps don't register / get 403**
-→ Your topic likely has access control. Set `NTFY_TOKEN` or `NTFY_USER`/`NTFY_PASSWORD` so the button callbacks can authenticate. The script injects auth into the action headers automatically.
+→ Your topic likely has access control. Set `CLAUDE_NTFY_TOKEN` or `CLAUDE_NTFY_USER`/`CLAUDE_NTFY_PASSWORD` so the button callbacks can authenticate. The script injects auth into the action headers automatically.
 
 **Timeout even though you replied**
 → Check that you're replying to the correct topic. If using auth, ensure the phone app is also authenticated to the same topic.
 
 **"WARNING: Sending credentials over non-HTTPS connection"**
-→ Switch `NTFY_SERVER` to an `https://` URL. Credentials in headers are visible over plain HTTP.
+→ Switch `CLAUDE_NTFY_SERVER` to an `https://` URL. Credentials in headers are visible over plain HTTP.
 
 ## License
 

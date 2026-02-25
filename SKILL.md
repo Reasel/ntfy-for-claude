@@ -12,25 +12,20 @@ Send questions with numbered options to the user's phone via [ntfy](https://ntfy
 - `curl`, `jq`, and `base64` must be available (standard on most systems)
 - The user should have the ntfy app installed on their phone ([Android](https://play.google.com/store/apps/details?id=io.heckel.ntfy) / [iOS](https://apps.apple.com/app/ntfy/id1625396347)) and be subscribed to their topic.
 
-### Required Environment Variable
-
-| Variable | Description |
-|----------|-------------|
-| `NTFY_TOPIC` | Your unique ntfy topic name |
-
 ### Optional Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `NTFY_SERVER` | `https://ntfy.sh` | Server URL. Set for self-hosted instances |
-| `NTFY_TIMEOUT` | `300` | Seconds to wait for a reply |
+| `CLAUDE_NTFY_TOPIC` | `claude-<hash>` | Topic name. Auto-generated from hostname + username if not set |
+| `CLAUDE_NTFY_SERVER` | `https://ntfy.sh` | Server URL. Set for self-hosted instances |
+| `CLAUDE_NTFY_TIMEOUT` | `300` | Seconds to wait for a reply |
 
 ### Authentication (choose one method or skip for public topics)
 
 | Variable | Description |
 |----------|-------------|
-| `NTFY_TOKEN` | **Preferred.** An ntfy access token (e.g., `tk_AgQdq7mVBoFD37zQVN29RhuMzNIz2`). Created via `ntfy token add <username>` on self-hosted servers, or in Account > Access Tokens on the web UI. |
-| `NTFY_USER` + `NTFY_PASSWORD` | Basic auth fallback. If both `NTFY_TOKEN` and user/password are set, token wins. |
+| `CLAUDE_NTFY_TOKEN` | **Preferred.** An ntfy access token (e.g., `tk_AgQdq7mVBoFD37zQVN29RhuMzNIz2`). Created via `ntfy token add <username>` on self-hosted servers, or in Account > Access Tokens on the web UI. |
+| `CLAUDE_NTFY_USER` + `CLAUDE_NTFY_PASSWORD` | Basic auth fallback. If both `CLAUDE_NTFY_TOKEN` and user/password are set, token wins. |
 
 Auth is applied to **both** outgoing notifications **and** action button callbacks, so replies work correctly on access-controlled topics.
 
@@ -56,9 +51,9 @@ For a private self-hosted ntfy server with access control:
 
 4. **Set your env vars**:
    ```bash
-   export NTFY_SERVER="https://ntfy.yourdomain.com"
-   export NTFY_TOPIC="claude-code-topic"
-   export NTFY_TOKEN="tk_..."
+   export CLAUDE_NTFY_SERVER="https://ntfy.yourdomain.com"
+   export CLAUDE_NTFY_TOPIC="claude-code-topic"
+   export CLAUDE_NTFY_TOKEN="tk_..."
    ```
 
 5. **In the phone app**, add the subscription using the same server URL and topic, logging in with the user credentials or a separate read-access token.

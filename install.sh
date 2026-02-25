@@ -58,29 +58,30 @@ echo "   ✅ Skill installed to ${DEST}"
 echo ""
 echo "🔧 Checking environment..."
 
-if [[ -z "${NTFY_TOPIC:-}" ]]; then
-    echo "   ⚠️  NTFY_TOPIC is not set."
+if [[ -z "${CLAUDE_NTFY_TOPIC:-}" ]]; then
+    AUTO_TOPIC="claude-$(echo -n "$(hostname)-$(whoami)" | sha256sum | cut -c1-12)"
+    echo "   ℹ️  CLAUDE_NTFY_TOPIC is not set. Will auto-generate: ${AUTO_TOPIC}"
+    echo "      Subscribe to this topic in your ntfy app."
     echo ""
-    echo "   Add the following to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
+    echo "   To set a custom topic, add to your shell profile (~/.bashrc, ~/.zshrc, etc.):"
     echo ""
-    echo "     # ntfy-notify config"
-    echo "     export NTFY_TOPIC=\"claude-code-\$(openssl rand -hex 6)\"  # or your own topic name"
+    echo "     export CLAUDE_NTFY_TOPIC=\"your-custom-topic\""
     echo ""
     echo "   For self-hosted servers, also set:"
-    echo "     export NTFY_SERVER=\"https://ntfy.yourdomain.com\""
-    echo "     export NTFY_TOKEN=\"tk_your_token_here\""
+    echo "     export CLAUDE_NTFY_SERVER=\"https://ntfy.yourdomain.com\""
+    echo "     export CLAUDE_NTFY_TOKEN=\"tk_your_token_here\""
     echo ""
 else
-    echo "   ✅ NTFY_TOPIC is set: ${NTFY_TOPIC}"
-    if [[ -n "${NTFY_SERVER:-}" ]]; then
-        echo "   ✅ NTFY_SERVER: ${NTFY_SERVER}"
+    echo "   ✅ CLAUDE_NTFY_TOPIC is set: ${CLAUDE_NTFY_TOPIC}"
+    if [[ -n "${CLAUDE_NTFY_SERVER:-}" ]]; then
+        echo "   ✅ CLAUDE_NTFY_SERVER: ${CLAUDE_NTFY_SERVER}"
     else
-        echo "   ℹ️  NTFY_SERVER not set (will use https://ntfy.sh)"
+        echo "   ℹ️  CLAUDE_NTFY_SERVER not set (will use https://ntfy.sh)"
     fi
-    if [[ -n "${NTFY_TOKEN:-}" ]]; then
-        echo "   ✅ NTFY_TOKEN is set"
-    elif [[ -n "${NTFY_USER:-}" ]]; then
-        echo "   ✅ NTFY_USER is set (basic auth)"
+    if [[ -n "${CLAUDE_NTFY_TOKEN:-}" ]]; then
+        echo "   ✅ CLAUDE_NTFY_TOKEN is set"
+    elif [[ -n "${CLAUDE_NTFY_USER:-}" ]]; then
+        echo "   ✅ CLAUDE_NTFY_USER is set (basic auth)"
     else
         echo "   ℹ️  No auth configured (public topic mode)"
     fi
@@ -94,7 +95,7 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "✅ Installation complete!"
 echo ""
 echo "Next steps:"
-echo "  1. Set NTFY_TOPIC (and optionally NTFY_SERVER, NTFY_TOKEN) in your shell profile"
+echo "  1. Optionally set CLAUDE_NTFY_TOPIC, CLAUDE_NTFY_SERVER, CLAUDE_NTFY_TOKEN in your shell profile"
 echo "  2. Subscribe to your topic in the ntfy phone app"
 echo "  3. Test it:"
 echo "     bash ${DEST}/scripts/ntfy_ask.sh --notify \"🤖 Hello from Claude Code!\""

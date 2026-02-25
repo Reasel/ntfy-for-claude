@@ -10,17 +10,17 @@
 # ntfy supports up to 3 action buttons. If you pass more than 3 options,
 # the first 3 become buttons and the rest are text-only (user types number).
 #
-# Environment (required):
-#   NTFY_TOPIC    — Your ntfy topic name
+# Environment (optional but recommended):
+#   CLAUDE_NTFY_TOPIC    — Your ntfy topic name (auto-generated if not set)
 #
 # Environment (optional):
-#   NTFY_SERVER   — ntfy server URL (default: https://ntfy.sh)
-#   NTFY_TIMEOUT  — Seconds to wait for reply (default: 300)
+#   CLAUDE_NTFY_SERVER   — ntfy server URL (default: https://ntfy.sh)
+#   CLAUDE_NTFY_TIMEOUT  — Seconds to wait for reply (default: 300)
 #
 # Authentication (optional — use ONE method):
-#   NTFY_TOKEN    — Access token (preferred, e.g. tk_AgQdq7mVBoFD37zQVN29RhuMzNIz2)
-#   NTFY_USER     — Username for basic auth (requires NTFY_PASSWORD)
-#   NTFY_PASSWORD — Password for basic auth (requires NTFY_USER)
+#   CLAUDE_NTFY_TOKEN    — Access token (preferred, e.g. tk_AgQdq7mVBoFD37zQVN29RhuMzNIz2)
+#   CLAUDE_NTFY_USER     — Username for basic auth (requires CLAUDE_NTFY_PASSWORD)
+#   CLAUDE_NTFY_PASSWORD — Password for basic auth (requires CLAUDE_NTFY_USER)
 #
 # Token auth is preferred over basic auth. If both are set, token wins.
 # Auth is applied to both outgoing notifications AND action button callbacks,
@@ -37,9 +37,18 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Config
 # ---------------------------------------------------------------------------
-NTFY_SERVER="${NTFY_SERVER:-https://ntfy.sh}"
-NTFY_TOPIC="${NTFY_TOPIC:?ERROR: Set NTFY_TOPIC environment variable}"
-TIMEOUT="${NTFY_TIMEOUT:-300}"
+NTFY_SERVER="${CLAUDE_NTFY_SERVER:-https://ntfy.sh}"
+TIMEOUT="${CLAUDE_NTFY_TIMEOUT:-300}"
+
+# Generate a stable default topic from hostname + username if not set
+if [[ -n "${CLAUDE_NTFY_TOPIC:-}" ]]; then
+    NTFY_TOPIC="$CLAUDE_NTFY_TOPIC"
+else
+    TOPIC_HASH=$(echo -n "$(hostname)-$(whoami)" | sha256sum | cut -c1-12)
+    NTFY_TOPIC="claude-${TOPIC_HASH}"
+    echo "NOTE: CLAUDE_NTFY_TOPIC not set. Using auto-generated topic: ${NTFY_TOPIC}" >&2
+    echo "      Subscribe to this topic in your ntfy app." >&2
+fi
 
 # Remove trailing slashes from server URL
 NTFY_SERVER="${NTFY_SERVER%/}"
@@ -53,14 +62,14 @@ TOPIC_URL="${NTFY_SERVER}/${NTFY_TOPIC}"
 AUTH_HEADER=""
 ACTION_AUTH=""
 
-if [[ -n "${NTFY_TOKEN:-}" ]]; then
+if [[ -n "${CLAUDE_NTFY_TOKEN:-}" ]]; then
     # Token auth (preferred)
-    AUTH_HEADER="Authorization: Bearer ${NTFY_TOKEN}"
+    AUTH_HEADER="Authorization: Bearer ${CLAUDE_NTFY_TOKEN}"
     # For http action buttons: pass auth as header so replies authenticate too
-    ACTION_AUTH="headers.Authorization=Bearer ${NTFY_TOKEN}"
-elif [[ -n "${NTFY_USER:-}" && -n "${NTFY_PASSWORD:-}" ]]; then
+    ACTION_AUTH="headers.Authorization=Bearer ${CLAUDE_NTFY_TOKEN}"
+elif [[ -n "${CLAUDE_NTFY_USER:-}" && -n "${CLAUDE_NTFY_PASSWORD:-}" ]]; then
     # Basic auth
-    BASIC_CRED=$(echo -n "${NTFY_USER}:${NTFY_PASSWORD}" | base64)
+    BASIC_CRED=$(echo -n "${CLAUDE_NTFY_USER}:${CLAUDE_NTFY_PASSWORD}" | base64)
     AUTH_HEADER="Authorization: Basic ${BASIC_CRED}"
     ACTION_AUTH="headers.Authorization=Basic ${BASIC_CRED}"
 fi
@@ -191,10 +200,10 @@ fi
 CURL_CMD+=(-d "$MESSAGE" "$TOPIC_URL")
 
 SEND_RESPONSE=$("${CURL_CMD[@]}" 2>&1) || {
-    echo "ERROR: Failed to send notification. Check NTFY_SERVER, NTFY_TOPIC, and auth credentials." >&2
+    echo "ERROR: Failed to send notification. Check CLAUDE_NTFY_SERVER, CLAUDE_NTFY_TOPIC, and auth credentials." >&2
     echo "Response: $SEND_RESPONSE" >&2
     if [[ "$SEND_RESPONSE" == *"403"* || "$SEND_RESPONSE" == *"401"* ]]; then
-        echo "HINT: Authentication failed. Check NTFY_TOKEN or NTFY_USER/NTFY_PASSWORD." >&2
+        echo "HINT: Authentication failed. Check CLAUDE_NTFY_TOKEN or CLAUDE_NTFY_USER/CLAUDE_NTFY_PASSWORD." >&2
     fi
     exit 3
 }
